@@ -165,7 +165,7 @@ int main(int argc, char* argv[])
         
         if (result != MQTTCLIENT_SUCCESS) 
         {
-          printf("Failed to connect, return code %d\n", result);
+          printf("Failed to reconnect, return code %d\n", result);
           exit(EXIT_FAILURE);
         }
         else

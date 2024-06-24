@@ -24,16 +24,18 @@
 /******* local macros *********************************************************/
 #define ADDRESS         "broker.hivemq.com:1883"
 #define CLIENTID        "IndustryProcess"
-#define TOPIC_Y         "UpdateCurrentPressure"
-#define TOPIC_X	        "UpateHysteresisCorrection"
+#define TOPIC_Y         "CurrentPressure"
+#define TOPIC_X	        "HysteresisCorrection"
 #define QOS             0
 #define TIMEOUT         10000L
 #define TIMERPERIOD     1000L
 #define PAYLOADSIZE     ((uint32_t) 50u)
+#define DEBUGLOG        0
 
 /******* local data objects ***************************************************/
 MQTTClient client;
 
+uint32_t connectionLost = 0;
 float hysteresis_correction[2u] = {0};
 float pressure[2u] = {0};
 
@@ -45,7 +47,9 @@ int messageArrivedHandler(void *context, char *topicName, int topicLen,
 
 void CALLBACK timerCallback(HWND hwnd, UINT uMsg, UINT_PTR idEvent,
                             DWORD dwTime);
-                            
+                    
+void connectionLostHandler(void *context, char *cause);
+        
 int main(void);
 
 /******* definition of local functions ****************************************/
@@ -70,9 +74,13 @@ void updatePressureValue(float pressureValue)
   }
   else 
   {
+#if (DEBUGLOG)
     printf("Message published: %s\n", payload);
+#endif
     result = MQTTClient_waitForCompletion(client, token, TIMEOUT);
+#if (DEBUGLOG)
     printf("Message with delivery token %d delivered\n", token);
+#endif
   }
 }
 
@@ -92,10 +100,11 @@ int messageArrivedHandler(void *context, char *topicName, int topicLen,
 void CALLBACK timerCallback(HWND hwnd, UINT uMsg, UINT_PTR idEvent,
                             DWORD dwTime) 
 {
+#if (DEBUGLOG)
   printf("x[n] = %f\n", hysteresis_correction[0u]);
   printf("x[n-1] = %f\n", hysteresis_correction[1u]);
   printf("y[n-1] = %f\n", pressure[0u]);
-  
+#endif
   pressure[1u] = ((1.0/21.0) * 
                   (hysteresis_correction[1u] + hysteresis_correction[0u])) +
                  (19.0/21.0) * pressure[0u];
@@ -107,9 +116,19 @@ void CALLBACK timerCallback(HWND hwnd, UINT uMsg, UINT_PTR idEvent,
   updatePressureValue(pressure[1u]);
 }
 
+void connectionLostHandler(void *context, char *cause) 
+{
+  connectionLost = 1u;
+#if (DEBUGLOG)
+  printf("\nConnection lost\n");
+  printf("-Cause: %s\n", cause);
+#endif
+}
+
 int main() 
 {
   int result;
+  int numberOfConnectRetries = 100u;
   MQTTClient_connectOptions connectionOptions = MQTTClient_connectOptions_initializer;
   MSG receivedMessage;
   UINT_PTR timerId;
@@ -122,7 +141,8 @@ int main()
 
   MQTTClient_create(&client, ADDRESS, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE,
                     NULL);
-  MQTTClient_setCallbacks(client, NULL, NULL, messageArrivedHandler, NULL);
+  MQTTClient_setCallbacks(client, NULL, connectionLostHandler,
+                          messageArrivedHandler, NULL);
   
   connectionOptions.keepAliveInterval = 20;
   connectionOptions.cleansession = 1;
@@ -146,6 +166,26 @@ int main()
   {
     TranslateMessage(&receivedMessage);
     DispatchMessage(&receivedMessage);
+    
+    if (connectionLost == 1u)
+    {
+      result = MQTTCLIENT_FAILURE;
+      while ((result != MQTTCLIENT_SUCCESS) && (numberOfConnectRetries > 0))
+      {
+        result = MQTTClient_connect(client, &connectionOptions);
+        numberOfConnectRetries--;
+      }
+      
+      if (result != MQTTCLIENT_SUCCESS) 
+      {
+        printf("Failed to reconnect, return code %d\n", result);
+        exit(EXIT_FAILURE);
+      }
+      else
+      {
+        connectionLost = 0u;
+      }
+    }
   }
 
   KillTimer(NULL, timerId);
