@@ -20,7 +20,7 @@ Write a program that tests the average response time of a broker:
 Choose QoS for minimum fluctuation in average response time. The average response time is labeled Tp
 The system simulating pressure control in an industrial process is depicted in the following image:
 
-![Slika](link_to_image)
+![Requirements](Project2_IndustryProcess/images/Requirements.png)
 
 a) The industrial process is described by a differential equation modeling a first-order system with a time constant of 10s and gain of 1:
 \[ y[n] = \frac{1}{21} \left( x[n] + x[n-1] \right) + \frac{19}{21} y[n-1] \]
@@ -62,19 +62,19 @@ Write a program that enables synchronous reading of a 3D accelerometer and 3D gy
 ##### QOS 0
 Average response time: 0.06-0.07 ms
 
-![QOS0](https://github.com/UrosCvjetinovic/Project1_BrokerResponseTime/images/QOS0.png)
+![QOS0](Project1_BrokerResponseTime/images/QOS0.png)
  
 
 ##### QOS 1
 Average response time: 67-68 ms
 
-![QOS1](https://github.com/UrosCvjetinovic/Project1_BrokerResponseTime/images/QOS1.png)
+![QOS1](Project1_BrokerResponseTime/images/QOS1.png)
  
 
 ##### QOS 2
 Average response time: 149-151 ms
 
-![QOS2](https://github.com/UrosCvjetinovic/Project1_BrokerResponseTime/images/QOS2.png)
+![QOS2](Project1_BrokerResponseTime/images/QOS2.png)
  
  
 ### Part 2 - Simulate a industry process
