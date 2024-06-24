@@ -30,11 +30,6 @@ b) The controller subscribes to topics for current pressure \( p(t) \) (received
 
 c) Run the simulation for deltaP = 5. Document the regulation quality for several slider positions: 10, 40, 60, 80. Repeat for deltaP = 1.
 
-## Project requirements:
-**Integrated Computer Systems 2, project 7b**
-
-Write a program that enables synchronous reading of a 3D accelerometer and 3D gyroscope using the X-NUCLEO-IKS01A2 sensor board. The acquired data needs to be transmitted via a serial connection to a computer and graphically displayed on an OLED display.
-
 # Report 
 ## How to set up
 ### Software
@@ -60,9 +55,9 @@ Write a program that enables synchronous reading of a 3D accelerometer and 3D gy
  - Create and connect to MQTT client
  - Configure callbacks if message is delivered, arrived or if connection is lost
  - Repeat 100 times
- -- Publish new value to topic
- -- When message is delivered calculate time between publishing and delivered
- -- If there was a connection lost try several times to reconnect to client
+   - Publish new value to topic
+   - When message is delivered calculate time between publishing and delivered
+   - If there was a connection lost try several times to reconnect to client
  - Print out average time
  - Get user input to repeat measurement or to quit program
  - Disconnect from client
@@ -90,5 +85,36 @@ Average response time: 149-151 ms
 ### Part 2 - Simulate a industry process
 
 #### Logic
+
+##### Process
+ - Select QOS 0 since it fluctuates the least
+ - Create and connect to MQTT client
+ - Configure callbacks if message is delivered, arrived
+ - Subscribe to topic: HysteresisCorrection
+ - Configure timer with period 1s
+ - Enter forever loop
+   - Each timer period
+     - Calculate new value pressure value
+     - Update input and output of process
+     - Publish output value to topic CurrentPressure
+   - If arrived message is from HysteresisCorrection
+     - Update value on process input
+   - If there was a connection lost try several times to reconnect to client
+   - If cannont reconnect exit forever loop
+
+##### Regulator
+ - Select QOS 0 since it fluctuates the least
+ - Create and connect to MQTT client
+ - Configure callbacks if message arrived
+ - Subscribe to topics: CurrentPressure and SetPressure
+ - Enter forever loop
+   - If arrived message is from CurrentPressure
+     - Calculate if hysteresis correction is 0 or 100
+     - Publish the value to topic HysteresisCorrection
+   - If arrived message is from SetPressure
+     - update value of pressure to set
+   - If there was a connection lost try several times to reconnect to client
+   - If cannont reconnect exit forever loop
+
 
 #### Testing
