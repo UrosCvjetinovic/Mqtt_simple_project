@@ -38,7 +38,7 @@ void updateHysteresisControlValue(float hysteresisControlToSet);
 int messageArrived(void *context, char *topicName, int topicLen,
                    MQTTClient_message *message);
 
-void handleCurrentPressureTopic(void);
+void handleCurrentPressureTopic(float pressureValue);
 
 void handleSetPressureTopic(float pressureValue);
 
@@ -64,8 +64,9 @@ void updateHysteresisControlValue(float hysteresisControlToSet)
   MQTTClient_publishMessage(client, TOPIC_X, &publishMessage, NULL);
 }
 
-void handleCurrentPressureTopic(void) 
+void handleCurrentPressureTopic(float pressureValue) 
 {
+  currentPressureValue = pressureValue;
 #if (DEBUGLOG)
   printf("Current pressure: %f\n", currentPressureValue);
   printf("Pressure to set: %f\n", pressureValueToSet);
@@ -86,7 +87,7 @@ void handleCurrentPressureTopic(void)
 void handleSetPressureTopic(float pressureValue) 
 {
 #if (DEBUGLOG)
-  printf("SetPressure: %f\n", currentPressureValue);
+  printf("SetPressure: %f\n", pressureValue);
 #endif
   pressureValueToSet = pressureValue;
 }
@@ -95,13 +96,14 @@ int messageArrivedHandler(void *context, char *topicName, int topicLen,
                           MQTTClient_message *message) 
 {
   char* payload = (char*) malloc(message->payloadlen + 1);
-  float messageValue = atof(payload);
+  double messageValue;
 
   printf("Message arrived on topic: %s\n", topicName);
 
   memcpy(payload, message->payload, message->payloadlen);
   payload[message->payloadlen] = '\0';
-
+  messageValue = atof(payload);
+  
 #if (DEBUGLOG)
   printf("Received message: %s\n", payload);
   printf("Converted float: %f\n", messageValue);
@@ -109,7 +111,7 @@ int messageArrivedHandler(void *context, char *topicName, int topicLen,
 
   if (strcmp(topicName, TOPIC_Y) == 0)
   {
-    handleCurrentPressureTopic();
+    handleCurrentPressureTopic(messageValue);
   } 
   else if (strcmp(topicName, TOPIC_YZ) == 0) 
   {
