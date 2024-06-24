@@ -23,12 +23,14 @@ The system simulating pressure control in an industrial process is depicted in t
 ![Requirements](Project2_IndustryProcess/images/Requirements.png)
 
 a) The industrial process is described by a differential equation modeling a first-order system with a time constant of 10s and gain of 1:
-\[ y[n] = \frac{1}{21} \left( x[n] + x[n-1] \right) + \frac{19}{21} y[n-1] \]
-Here, \( y[n] \) represents the pressure \( p(t) \) in relative units [0-100%]. Sampling of \( y[n] \) based on the input signal occurs with a period \( T_s = 1 \)s (using a timer). All initial values for the differential equation are 0. Whenever a new value of \( p(t) \) is generated, it is written to the corresponding topic. A mobile application subscribes to this topic and graphs the pressure values every second whenever a new \( y[n] \) is received. Additionally, the mobile application generates the desired pressure \( p_z(t) \) via a slider ranging from 10 to 90, which is written to another corresponding topic.
 
-b) The controller subscribes to topics for current pressure \( p(t) \) (received every second) and desired pressure \( p_z(t) \) (received when the slider is adjusted). The controller implements hysteresis ON-OFF control such that if the current pressure \( p(t) \) exceeds \( p_z(t) \) by deltaP, it writes 0 to the appropriate topic. If \( p(t) \) is less than \( p_z(t) \) by deltaP, it writes 100 to the topic. If within bounds, nothing is written. The industrial processes subscribe to this topic, receiving either 0 or 100 from the broker, which is then stored in \( x_{temp} \). At each sampling instance \( T_s \), \( x[n] \) is set to \( x_{temp} \).
+$ y[n] = \frac{1}{21} \left( x[n] + x[n-1] \right) + \frac{19}{21} y[n-1] $
 
-c) Run the simulation for deltaP = 5. Document the regulation quality for several slider positions: 10, 40, 60, 80. Repeat for deltaP = 1.
+Here, $ y[n] $ represents the pressure $ p(t) $ in relative units [0-100%]. Sampling of $ y[n] $ based on the input signal occurs with a period $ T_s = 1s $  (using a timer). All initial values for the differential equation are 0. Whenever a new value of $ p(t) $ is generated, it is written to the corresponding topic. A mobile application subscribes to this topic and graphs the pressure values every second whenever a new $ y[n] $ is received. Additionally, the mobile application generates the desired pressure $ p_z(t) $ via a slider ranging from 10 to 90, which is written to another corresponding topic.
+
+b) The controller subscribes to topics for current pressure $ p(t) $ (received every second) and desired pressure $ p_z(t) $ (received when the slider is adjusted). The controller implements hysteresis ON-OFF control such that if the current pressure $ p(t) $ exceeds $ p_z(t) $ by $\Delta$ p, it writes 0 to the appropriate topic. If $ p(t) $ is less than $ p_z(t) $ by $\Delta$ p, it writes 100 to the topic. If within bounds, nothing is written. The industrial processes subscribe to this topic, receiving either 0 or 100 from the broker, which is then stored in $ x_{temp} $. At each sampling instance $ T_s $, $ x[n] $ is set to $ x_temp $.
+
+c) Run the simulation for $\Delta$ p = 5. Document the regulation quality for several slider positions: 10, 40, 60, 80. Repeat for $\Delta$ p = 1.
 
 # Report 
 ## How to set up
@@ -44,6 +46,10 @@ c) Run the simulation for deltaP = 5. Document the regulation quality for severa
  - Set up broker with configured topic (see source code):
 ```
    https://www.hivemq.com/demos/websocket-client/
+```
+ - Android application in order to visualize results:
+```
+   IoT MQTT Panel
 ```
  
 ## Implementation 
@@ -118,3 +124,35 @@ Average response time: 149-151 ms
 
 
 #### Testing
+
+##### $\Delta$ p = 1 , set pressure = 10
+
+![dp1per10](Project2_IndustryProcess/images/delta_1_per_10.png)
+
+##### $\Delta$ p = 1 , set pressure = 40
+
+![dp1per40](Project2_IndustryProcess/images/delta_1_per_40.png)
+
+##### $\Delta$ p = 1 , set pressure = 60
+
+![dp1per60](Project2_IndustryProcess/images/delta_1_per_60.png)
+
+##### $\Delta$ p = 1 , set pressure = 80
+
+![dp1per80](Project2_IndustryProcess/images/delta_1_per_80.png)
+
+##### $\Delta$ p = 5 , set pressure = 10
+
+![dp5per10](Project2_IndustryProcess/images/delta_5_per_10.png)
+
+##### $\Delta$ p = 5 , set pressure = 40
+
+![dp5per40](Project2_IndustryProcess/images/delta_5_per_40.png)
+
+##### $\Delta$ p = 5 , set pressure = 60
+
+![dp5per60](Project2_IndustryProcess/images/delta_5_per_60.png)
+
+##### $\Delta$ p = 5 , set pressure = 80
+
+![dp5per80](Project2_IndustryProcess/images/delta_5_per_80.png)
