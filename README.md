@@ -57,6 +57,16 @@ Write a program that enables synchronous reading of a 3D accelerometer and 3D gy
 
 #### Logic
 
+ - Create and connect to MQTT client
+ - Configure callbacks if message is delivered, arrived or if connection is lost
+ - Repeat 100 times
+ -- Publish new value to topic
+ -- When message is delivered calculate time between publishing and delivered
+ -- If there was a connection lost try several times to reconnect to client
+ - Print out average time
+ - Get user input to repeat measurement or to quit program
+ - Disconnect from client
+
 #### Testing
 
 ##### QOS 0
